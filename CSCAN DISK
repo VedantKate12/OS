@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+void sort(int arr[], int n) {
+    for (int i = 0; i < n-1; i++) {
+        for (int j = i+1; j < n; j++) {
+            if (arr[i] > arr[j]) {
+                int temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+    }
+}
+
+void printTable(int requests[], int n, int head, int totalSeekTime) {
+    printf("Request\tSeek Time\n");
+    printf("-------\t---------\n");
+    for (int i = 0; i < n; i++) {
+        printf("%d\t%d\n", requests[i], abs(requests[i] - head));
+        head = requests[i];
+    }
+    printf("Total Seek Time: %d\n", totalSeekTime);
+}
+
+int main() {
+    int n, head, diskSize, totalSeekTime = 0;
+
+    // Input
+    printf("Enter number of requests: ");
+    scanf("%d", &n);
+    int requests[n + 1];  // +1 for the boundary (disk size)
+
+    printf("Enter request sequence:\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &requests[i]);
+    }
+
+    printf("Enter initial head position: ");
+    scanf("%d", &head);
+
+    printf("Enter disk size (last cylinder): ");
+    scanf("%d", &diskSize);
+    requests[n] = diskSize - 1;  // Add end boundary (disk size - 1)
+
+    // Sort the requests
+    sort(requests, n + 1);
+
+    // Find the starting position of the head
+    int index = 0;
+    while (index < n + 1 && requests[index] < head) {
+        index++;
+    }
+
+    // Move in the increasing direction and wrap around (C-SCAN)
+    int currentHead = head;
+    for (int i = index; i < n + 1; i++) {
+        totalSeekTime += abs(requests[i] - currentHead);
+        currentHead = requests[i];
+    }
+
+    // Jump to the start of the disk (0) after reaching the end
+    totalSeekTime += abs(currentHead - 0);
+    currentHead = 0;
+
+    // Now, continue servicing requests from the start
+    for (int i = 0; i < index; i++) {
+        totalSeekTime += abs(requests[i] - currentHead);
+        currentHead = requests[i];
+    }
+
+    // Output the result
+    printf("\nC-SCAN Disk Scheduling:\n");
+    printTable(requests, n + 1, head, totalSeekTime);
+
+    return 0;
+}
