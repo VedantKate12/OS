@@ -1,0 +1,38 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+void printTable(int requests[], int n, int head, int totalSeekTime) {
+    printf("Request\tSeek Time\n");
+    printf("-------\t---------\n");
+    for (int i = 0; i < n; i++) {
+        printf("%d\t%d\n", requests[i], abs(requests[i] - head));
+        head = requests[i];
+    }
+    printf("Total Seek Time: %d\n", totalSeekTime);
+}
+
+int main() {
+    int n, head, totalSeekTime = 0;
+
+    printf("Enter number of requests: ");
+    scanf("%d", &n);
+    int requests[n];
+
+    printf("Enter request sequence:\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &requests[i]);
+    }
+
+    printf("Enter initial head position: ");
+    scanf("%d", &head);
+
+    for (int i = 0; i < n; i++) {
+        totalSeekTime += abs(requests[i] - head);
+        head = requests[i];
+    }
+
+    printf("\nFCFS Disk Scheduling:\n");
+    printTable(requests, n, head, totalSeekTime);
+
+    return 0;
+}
