@@ -1,0 +1,80 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+#define SIZE 10
+
+// Function to compute the sum of even numbers in the array
+int sum_even(int arr[], int size) {
+    int sum = 0;
+    for (int i = 0; i < size; i++) {
+        if (arr[i] % 2 == 0) {
+            sum += arr[i];
+        }
+    }
+    return sum;
+}
+
+// Function to compute the sum of odd numbers in the array
+int sum_odd(int arr[], int size) {
+    int sum = 0;
+    for (int i = 0; i < size; i++) {
+        if (arr[i] % 2 != 0) {
+            sum += arr[i];
+        }
+    }
+    return sum;
+}
+
+int main() {
+    int arr[SIZE] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    pid_t pid;
+
+    // Create a child process
+    pid = fork();
+
+    if (pid < 0) {
+        // Error in fork
+        perror("fork failed");
+        return 1;
+    }
+
+    if (pid > 0) {
+        // Parent process
+        printf("Parent Process (PID: %d)\n", getpid());
+
+        // Calculating sum of even numbers in the parent process
+        int even_sum = sum_even(arr, SIZE);
+        printf("Sum of even numbers in the array (Parent): %d\n", even_sum);
+
+        // Wait for child process to terminate (Zombie process demonstration)
+        wait(NULL);  // Parent waits for the child process to terminate
+
+        // Uncomment to see zombie process:
+        // The child process will become a zombie if the parent doesn't wait for it
+        // before exiting. This code demonstrates zombie behavior.
+        // After waiting, the child will be reaped and removed from the process table.
+        
+        printf("Parent Process Completed (PID: %d)\n", getpid());
+    }
+    else {
+        // Child process
+        printf("Child Process (PID: %d)\n", getpid());
+
+        // Calculating sum of odd numbers in the child process
+        int odd_sum = sum_odd(arr, SIZE);
+        printf("Sum of odd numbers in the array (Child): %d\n", odd_sum);
+
+        // Child process will terminate here, causing a zombie process
+        // if the parent process doesn't wait for it.
+        // Uncomment the following line to simulate an orphan process:
+        // exit(0);  // This makes the child an orphan if the parent exits
+
+        printf("Child Process Completed (PID: %d)\n", getpid());
+        exit(0);  // Child terminates here
+    }
+
+    return 0;
+}
