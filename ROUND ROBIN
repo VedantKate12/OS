@@ -1,0 +1,80 @@
+#include <stdio.h>
+
+void findWaitingTime(int processes[], int n, int bt[], int wt[], int quantum) {
+    int rem_bt[n];  // Remaining burst time for each process
+    for (int i = 0; i < n; i++) {
+        rem_bt[i] = bt[i]; // Initialize remaining burst times
+    }
+
+    int time = 0;  // Track the total time
+    while (1) {
+        int done = 1;  // Flag to check if all processes are completed
+        for (int i = 0; i < n; i++) {
+            if (rem_bt[i] > 0) {
+                done = 0;
+                if (rem_bt[i] > quantum) {
+                    time += quantum;
+                    rem_bt[i] -= quantum;
+                } else {
+                    time += rem_bt[i];
+                    wt[i] = time - bt[i]; // Calculate waiting time
+                    rem_bt[i] = 0; // Process finished
+                }
+            }
+        }
+        if (done == 1) {
+            break;
+        }
+    }
+}
+
+void findTurnaroundTime(int processes[], int n, int bt[], int wt[], int tat[]) {
+    for (int i = 0; i < n; i++) {
+        tat[i] = bt[i] + wt[i]; // Turnaround time = Burst time + Waiting time
+    }
+}
+
+void findFinishTime(int processes[], int n, int bt[], int wt[], int ft[]) {
+    for (int i = 0; i < n; i++) {
+        ft[i] = wt[i] + bt[i]; // Finish time = Waiting time + Burst time
+    }
+}
+
+void roundRobin(int processes[], int n, int bt[], int quantum) {
+    int wt[n], tat[n], ft[n];
+
+    // Initialize waiting time
+    for (int i = 0; i < n; i++) {
+        wt[i] = 0;
+    }
+
+    // Compute waiting time
+    findWaitingTime(processes, n, bt, wt, quantum);
+
+    // Compute turnaround time
+    findTurnaroundTime(processes, n, bt, wt, tat);
+
+    // Compute finish time
+    findFinishTime(processes, n, bt, wt, ft);
+
+    int total_wt = 0, total_tat = 0;
+    printf("Process\tBurst Time\tWaiting Time\tTurnaround Time\tFinish Time\n");
+    for (int i = 0; i < n; i++) {
+        total_wt += wt[i];
+        total_tat += tat[i];
+        printf("%d\t\t%d\t\t%d\t\t%d\t\t%d\n", processes[i], bt[i], wt[i], tat[i], ft[i]);
+    }
+    printf("\nAverage waiting time: %.2f\n", (float)total_wt / n);
+    printf("Average turnaround time: %.2f\n", (float)total_tat / n);
+}
+
+int main() {
+    int processes[] = {1, 2, 3, 4}; // Process IDs
+    int burstTime[] = {6, 8, 7, 3}; // Burst times for each process
+    int n = sizeof(processes) / sizeof(processes[0]); // Number of processes
+    int quantum = 4; // Time quantum for round robin scheduling
+    
+    roundRobin(processes, n, burstTime, quantum);
+    
+    return 0;
+}
