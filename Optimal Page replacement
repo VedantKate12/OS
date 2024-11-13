@@ -1,0 +1,81 @@
+#include <stdio.h>
+
+int findOptimal(int referenceString[], int memory[], int frames, int current, int n) {
+    int farthest = current;
+    int pos = -1;
+
+    for (int i = 0; i < frames; i++) {
+        int j;
+        for (j = current + 1; j < n; j++) {
+            if (memory[i] == referenceString[j]) {
+                if (j > farthest) {
+                    farthest = j;
+                    pos = i;
+                }
+                break;
+            }
+        }
+        // If memory[i] is not found in future reference string
+        if (j == n) {
+            return i;
+        }
+    }
+
+    // If all pages in memory are used again in future, return the farthest one
+    return (pos == -1) ? 0 : pos;
+}
+
+int main() {
+    int frames;
+    printf("Enter the number of frames: ");
+    scanf("%d", &frames);
+
+    int memory[frames];
+    for (int i = 0; i < frames; i++) {
+        memory[i] = -1; // Initialize memory slots to -1 (indicating empty)
+    }
+
+    int pageFaults = 0, n;
+    printf("Enter the number of pages in the reference string: ");
+    scanf("%d", &n);
+    int referenceString[n];
+
+    printf("Enter the reference string:\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &referenceString[i]);
+    }
+
+    for (int i = 0; i < n; i++) {
+        int page = referenceString[i];
+        int found = 0;
+
+        // Check if the page is already in memory
+        for (int j = 0; j < frames; j++) {
+            if (memory[j] == page) {
+                found = 1;
+                break;
+            }
+        }
+
+        // If page is not found in memory, a page fault occurs
+        if (!found) {
+            pageFaults++;
+            
+            // Find an empty slot or use the optimal replacement strategy
+            int pos;
+            for (pos = 0; pos < frames; pos++) {
+                if (memory[pos] == -1) {
+                    break;
+                }
+            }
+            if (pos == frames) { // All frames are filled, apply Optimal replacement
+                pos = findOptimal(referenceString, memory, frames, i, n);
+            }
+
+            memory[pos] = page; // Replace the selected page
+        }
+    }
+
+    printf("\nTotal page faults: %d\n", pageFaults);
+    return 0;
+}
