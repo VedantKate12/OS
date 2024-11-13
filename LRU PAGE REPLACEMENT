@@ -1,0 +1,71 @@
+#include <stdio.h>
+
+int findLRU(int time[], int frames) {
+    int min = time[0], pos = 0;
+    for (int i = 1; i < frames; i++) {
+        if (time[i] < min) {
+            min = time[i];
+            pos = i;
+        }
+    }
+    return pos;
+}
+
+int main() {
+    int frames;
+    printf("Enter the number of frames: ");
+    scanf("%d", &frames);
+
+    int memory[frames], time[frames];
+    for (int i = 0; i < frames; i++) {
+        memory[i] = -1; // Initialize memory slots to -1 (indicating empty)
+    }
+
+    int pageFaults = 0, n, currentTime = 0;
+    printf("Enter the number of pages in the reference string: ");
+    scanf("%d", &n);
+    int referenceString[n];
+    
+    printf("Enter the reference string:\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &referenceString[i]);
+    }
+
+    for (int i = 0; i < n; i++) {
+        int page = referenceString[i];
+        int found = 0;
+
+        // Check if page is already in memory
+        for (int j = 0; j < frames; j++) {
+            if (memory[j] == page) {
+                found = 1;
+                time[j] = ++currentTime; // Update time for LRU
+                break;
+            }
+        }
+
+        // If page is not found in memory, a page fault occurs
+        if (!found) {
+            pageFaults++;
+
+            int pos;
+            // If there is an empty slot, use it
+            for (pos = 0; pos < frames; pos++) {
+                if (memory[pos] == -1) {
+                    break;
+                }
+            }
+            // If no empty slot, find the LRU page to replace
+            if (pos == frames) {
+                pos = findLRU(time, frames);
+            }
+
+            // Replace the page and update time
+            memory[pos] = page;
+            time[pos] = ++currentTime;
+        }
+    }
+
+    printf("\nTotal page faults: %d\n", pageFaults);
+    return 0;
+}
